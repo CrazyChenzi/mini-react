@@ -7,12 +7,12 @@ export type Ref = any;
 export type ElementType = any;
 
 export interface ReactElementType {
-	$$typeof: symbol | number;
-	key: Key;
-	props: Props;
-	ref: Ref;
-	type: ElementType;
-	__mark: string;
+  $$typeof: symbol | number;
+  key: Key;
+  props: Props;
+  ref: Ref;
+  type: ElementType;
+  __mark: string;
 }
 
 // 定义 Action type
