@@ -7,12 +7,14 @@ import {
 } from 'hostConfig';
 import { FiberNode } from './fiber';
 import {
+  Fragment,
   FunctionComponent,
   HostComponent,
   HostRoot,
   HostText
 } from './workTags';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
 // 生成更新计划，计算和收集更新 flags
 export const completeWork = (workInProgress: FiberNode) => {
@@ -21,12 +23,14 @@ export const completeWork = (workInProgress: FiberNode) => {
   switch (workInProgress.tag) {
     case HostRoot:
     case FunctionComponent:
+    case Fragment:
       bubbleProperties(workInProgress);
       return null;
 
     case HostComponent:
       if (current !== null && workInProgress.stateNode !== null) {
-        // TODO: 组件的更新阶段
+        // 组件的更新阶段
+        updateHostComponent(current, workInProgress);
       } else {
         // 首屏渲染阶段
         // 构建 DOM
@@ -41,7 +45,8 @@ export const completeWork = (workInProgress: FiberNode) => {
 
     case HostText:
       if (current !== null && workInProgress.stateNode !== null) {
-        // TODO: 组件的更新阶段
+        // 组件的更新阶段
+        updateHostText(current, workInProgress);
       } else {
         // 首屏渲染阶段
         // 构建 DOM
@@ -59,6 +64,29 @@ export const completeWork = (workInProgress: FiberNode) => {
       return null;
   }
 };
+
+function updateHostText(current: FiberNode, workInProgress: FiberNode) {
+  const oldText = current.memoizedProps.content;
+  const newText = workInProgress.pendingProps.content;
+  if (oldText !== newText) {
+    markUpdate(workInProgress);
+  }
+}
+
+function updateHostComponent(current: FiberNode, workInProgress: FiberNode) {
+  const oldProps = current.memoizedProps;
+  const newProps = workInProgress.pendingProps;
+
+  if (oldProps !== newProps) {
+    markUpdate(workInProgress);
+  }
+  updateFiberProps(workInProgress.stateNode, newProps);
+}
+
+// 为 Fiber 节点增加 Update flags
+function markUpdate(workInProgress: FiberNode) {
+  workInProgress.flags |= Update;
+}
 
 /**
  * 负责递归地将组件的子节点添加到指定的 parent 中，

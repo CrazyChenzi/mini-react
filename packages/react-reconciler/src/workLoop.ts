@@ -22,6 +22,10 @@ function renderRoot(root: FiberRootNode) {
     }
   } while (true);
 
+  if (workInProgress !== null) {
+    console.error('render阶段结束时 workInProgress 不为 null');
+  }
+
   // 创建根 Fiber 树的 Root Fiber
   const finishedWork = root.current.alternate;
   root.finishedWork = finishedWork;
@@ -78,7 +82,7 @@ function workLoop() {
 function performUnitOfWork(fiber: FiberNode) {
   // 比较并返回子 FiberNode
   const next = beginWork(fiber);
-  fiber.memorizedPros = fiber.pendingProps;
+  fiber.memoizedProps = fiber.pendingProps;
 
   if (next == null) {
     // 没有子节点，则遍历兄弟节点或父节点
@@ -94,7 +98,11 @@ function completeUnitOfWork(fiber: FiberNode) {
   let node: FiberNode | null = fiber;
   do {
     // 生成更新计划
-    completeWork(node);
+    const next = completeWork(node) as FiberNode | null;
+    if (next !== null) {
+      workInProgress = next;
+      return;
+    }
     // 有兄弟节点，则遍历兄弟节点
     const sibling = node.sibling;
     if (sibling !== null) {
@@ -117,8 +125,10 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 // 从触发更新的节点向上遍历到 FiberRootNode
 function markUpdateFromFiberToRoot(fiber: FiberNode) {
   let node = fiber;
-  while (node.return !== null) {
-    node = node.return;
+  let parent = node.return;
+  while (parent !== null) {
+    node = parent;
+    parent = node.return;
   }
   if (node.tag == HostRoot) {
     return node.stateNode;

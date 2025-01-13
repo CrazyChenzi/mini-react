@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // packages/react-reconciler/src/fiber.ts
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
-import { FunctionComponent, HostComponent, WorkTag } from './workTags';
+import {
+  Fragment,
+  FunctionComponent,
+  HostComponent,
+  WorkTag
+} from './workTags';
 import { NoFlags, Flags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
@@ -16,17 +21,18 @@ export class FiberNode {
   index: number; // 索引；
   ref: Ref; // 指向节点的 ref 属性；
   pendingProps: Props; // 表示节点的新属性，用于在协调过程中进行更新。
-  memorizedPros: Props | null; // 已经更新完的属性
-  memorizedState: any; // 更新完成后新的 State
+  memoizedProps: Props | null; // 已经更新完的属性
+  memoizedState: any; // 更新完成后新的 State
   alternate: FiberNode | null; // 指向节点的备份节点，用于在协调过程中进行比较；
   flags: Flags; // 表示节点的副作用类型，如更新、插入、删除等；
+  deletions: Array<FiberNode> | null;
   subtreeFlags: Flags; // 表示子节点的副作用类型，如更新、插入、删除等；
   updateQueue: unknown; // 更新计划队列
 
   constructor(tag: WorkTag, pendingProps: Props, key: Key) {
     // 类型
     this.tag = tag;
-    this.key = key;
+    this.key = key || null;
     this.ref = null;
     this.stateNode = null; // 节点对应的实际 DOM 节点或组件实例
     this.type = null; // 节点的类型，可以是原生 DOM 元素、函数组件或类组件等
@@ -39,13 +45,14 @@ export class FiberNode {
 
     // 作为工作单元
     this.pendingProps = pendingProps; // 表示节点的新属性，用于在协调过程中进行更新
-    this.memorizedPros = null; // 已经更新完的属性
-    this.memorizedState = null; // 更新完成后新的 State
+    this.memoizedProps = null; // 已经更新完的属性
+    this.memoizedState = null; // 更新完成后新的 State
 
     this.alternate = null; // 指向节点的备份节点，用于在协调过程中进行比较
     this.flags = NoFlags; // 表示节点的副作用类型，如更新、插入、删除等
     this.subtreeFlags = NoFlags; // 表示子节点的副作用类型，如更新、插入、删除等
     this.updateQueue = null; // 更新计划队列
+    this.deletions = null; // 指向待删除的子节点，用于在协调过程中进行删除
   }
 }
 
@@ -87,8 +94,8 @@ export const createWorkInProgress = (
   workInProgress.type = current.type;
   workInProgress.updateQueue = current.updateQueue;
   workInProgress.child = current.child;
-  workInProgress.memorizedPros = current.memorizedPros;
-  workInProgress.memorizedState = current.memorizedState;
+  workInProgress.memoizedProps = current.memoizedProps;
+  workInProgress.memoizedState = current.memoizedState;
 
   return workInProgress;
 };
@@ -106,5 +113,10 @@ export function createFiberFromElement(element: ReactElementType): FiberNode {
 
   const fiber = new FiberNode(fiberTag, props, key);
   fiber.type = type;
+  return fiber;
+}
+
+export function createFiberFromFragment(elements: any[], key: Key): FiberNode {
+  const fiber = new FiberNode(Fragment, elements, key);
   return fiber;
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // packages/react/src/jsx.ts
-import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
+import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from 'shared/ReactSymbols';
 import {
   Type,
   Ref,
@@ -26,6 +26,8 @@ const ReactElement = function (
   };
   return element;
 };
+
+export const Fragment = REACT_FRAGMENT_TYPE;
 
 /* 
 输入示例:
@@ -116,3 +118,11 @@ export const jsxDEV = (type: ElementType, config: any) => {
   }
   return ReactElement(type, key, ref, props);
 };
+
+export function isValidElement(object: any): object is ReactElementType {
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    object.$$typeof === REACT_ELEMENT_TYPE
+  );
+}
