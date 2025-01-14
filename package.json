@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --ext .ts,.jsx,.tsx --fix --quiet ./packages",
     "build-dev": "rimraf dist && rollup --config scripts/rollup/dev.config.js --bundleConfigAsCjs",
-    "demo": "vite serve demos/testDiff --config scripts/vite/vite.config.js --force",
+    "demo": "vite serve demos/test1 --config scripts/vite/vite.config.js --force",
     "test": "jest --config scripts/jest/jest.config.js",
     "prepare": "husky"
   },
@@ -39,7 +39,6 @@
     "jest": "^29.7.0",
 		"jest-config": "^29.7.0",
 		"jest-environment-jsdom": "^29.7.0",
-    "jest-react": "^0.14.0",
     "prettier": "^3.0.3",
     "rimraf": "^6.0.1",
     "rollup": "^4.1.4",

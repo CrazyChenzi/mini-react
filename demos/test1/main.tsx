@@ -4,7 +4,17 @@ import ReactDOM from 'react-dom/client';
 
 function App() {
   const [count, setCount] = useState(1210);
-  return <div onClick={() => setCount(count + 1)}>{count}</div>;
+  return (
+    <div
+      onClick={() => {
+        setCount(count + 1);
+        setCount(count + 1);
+        setCount(count + 1);
+      }}
+    >
+      {count}
+    </div>
+  );
 }
 
 const root = ReactDOM.createRoot(
